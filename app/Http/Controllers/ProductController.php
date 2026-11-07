@@ -129,4 +129,62 @@ class ProductController extends Controller
         ]);
     }
 
+    // https://domain/api/products/3/update
+
+    // Actualizar producto
+    public function update(Request $request, string $id)
+    {
+
+        // Buscar producto en la base de datos
+        foreach ($this->list as $index => $item) {
+
+            if (strval($item['id']) === $id) {
+
+                // Actualizar nombre del producto
+                $this->list[$index]['name'] = $request->input('name');
+
+                // Actualizar precio del producto
+                $this->list[$index]['price'] = floatval($request->input('price'));
+
+                // Snapshot en cache
+                $this->saveList();
+
+                return response()->json([
+                    'message' => 'Producto actualizado',
+                    'item' => $this->list[$index]
+                ], 200);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Producto no encontrado',
+            'item' => null
+        ], 404);
+    }
+
+    // Eliminar producto por id
+    public function delete(string $id)
+    {
+        foreach ($this->list as $index => $item) {
+
+             if (strval($item['id']) === $id) {
+                
+                # Borrar valor dentro del array de productos
+                array_slice($this->list, $index, 1);
+                
+                # Actualizar la cache
+                $this->saveList();
+
+                return response()->json([
+                    'message' => 'El producto: ' . $item['name'] . ' ha sido eliminado',
+                    'item' => null
+                ], 200);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Producto no encontrado',
+            'item' => null
+        ], 404);
+    }
 }
